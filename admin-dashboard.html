@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homa Healthcare - Admin Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; padding: 20px; 
+        }
+        .container { 
+            max-width: 1200px; margin: 0 auto; background: white;
+            border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; 
+        }
+        .header { 
+            background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white;
+            padding: 30px; text-align: center; 
+        }
+        .header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .header p { font-size: 1.1rem; opacity: 0.9; }
+        .stats { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px; padding: 30px; background: #f8fafc; 
+        }
+        .stat-card { 
+            background: white; padding: 20px; border-radius: 10px;
+            text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.07); 
+        }
+        .stat-number { font-size: 2rem; font-weight: bold; color: #2563eb; margin-bottom: 5px; }
+        .stat-label { color: #64748b; font-size: 0.9rem; }
+        .controls { 
+            padding: 20px 30px; background: white; border-bottom: 1px solid #e2e8f0;
+            display: flex; gap: 15px; flex-wrap: wrap; align-items: center; 
+        }
+        .btn { 
+            padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer;
+            font-weight: 500; transition: all 0.3s ease; 
+        }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-success { background: #059669; color: white; }
+        .search-box { 
+            flex: 1; min-width: 200px; padding: 10px 15px; border: 2px solid #e2e8f0;
+            border-radius: 8px; font-size: 14px; 
+        }
+        .patients-table { padding: 30px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; font-weight: 600; color: #374151; }
+        tr:hover { background: #f8fafc; }
+        .loading { text-align: center; padding: 50px; color: #64748b; }
+        .quick-links { padding: 20px 30px; background: #f8fafc; }
+        .quick-links a { 
+            display: inline-block; margin-right: 20px; padding: 8px 16px;
+            background: #e2e8f0; color: #374151; text-decoration: none;
+            border-radius: 6px; font-size: 14px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Homa Healthcare Center</h1>
+            <p>Admin Dashboard - Patient Registrations</p>
+        </div>
+        
+        <div class="quick-links">
+            <a href="/register">📝 Patient Registration</a>
+            <a href="/admin">📊 Admin Dashboard</a>
+            <a href="https://homahealthcarecenter.in" target="_blank">🏠 Framer Website</a>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPatients">0</div>
+                <div class="stat-label">Total Registrations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayPatients">0</div>
+                <div class="stat-label">Today's Registrations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="newPatients">0</div>
+                <div class="stat-label">Pending Contact</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="confirmedPatients">0</div>
+                <div class="stat-label">Confirmed</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <input type="text" class="search-box" placeholder="🔍 Search patients..." id="searchBox">
+            <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh</button>
+            <button class="btn btn-success" onclick="exportData()">📥 Export CSV</button>
+        </div>
+        
+        <div class="patients-table">
+            <div class="loading" id="loading">⏳ Loading patient data...</div>
+            <table id="patientsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>#</th><th>👤 Name</th><th>📱 Phone</th><th>📧 Email</th>
+                        <th>🎂 Age</th><th>⏰ Registration</th><th>🔧 Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="patientsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let allPatients = [];
+        
+        window.onload = function() { refreshData(); };
+        setInterval(refreshData, 30000);
+        
+        async function refreshData() {
+            try {
+                const response = await fetch('/api/patients');
+                const patients = await response.json();
+                allPatients = patients;
+                updateStats(patients);
+                displayPatients(patients);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('patientsTable').style.display = 'table';
+            } catch (error) {
+                document.getElementById('loading').innerHTML = 
+                    '📋 No patients yet. <a href="/register">Register first patient</a>';
+            }
+        }
+        
+        function updateStats(patients) {
+            const total = patients.length;
+            const today = patients.filter(p => {
+                const regDate = new Date(p.registrationTime);
+                return regDate.toDateString() === new Date().toDateString();
+            }).length;
+            
+            document.getElementById('totalPatients').textContent = total;
+            document.getElementById('todayPatients').textContent = today;
+            document.getElementById('newPatients').textContent = patients.filter(p => (p.status || 'new') === 'new').length;
+            document.getElementById('confirmedPatients').textContent = patients.filter(p => p.status === 'confirmed').length;
+        }
+        
+        function displayPatients(patients) {
+            const tbody = document.getElementById('patientsBody');
+            tbody.innerHTML = '';
+            
+            if (patients.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 50px;">No patients yet. <a href="/register">Register first patient</a></td></tr>';
+                return;
+            }
+            
+            patients.forEach((patient, index) => {
+                const row = document.createElement('tr');
+                const regTime = new Date(patient.registrationTime);
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${patient.name || 'N/A'}</strong></td>
+                    <td>${patient.phone || 'N/A'}</td>
+                    <td>${patient.email || 'N/A'}</td>
+                    <td>${patient.age || 'N/A'}</td>
+                    <td>${regTime.toLocaleString()}</td>
+                    <td>
+                        <button style="padding: 5px 10px; margin: 2px; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="callPatient('${patient.phone}')">📞 Call</button>
+                        <button style="padding: 5px 10px; margin: 2px; background: #25d366; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="sendWhatsApp('${patient.phone}', '${patient.name}')">💬 WhatsApp</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function callPatient(phone) { window.open(`tel:${phone}`); }
+        
+        function sendWhatsApp(phone, name) {
+            const message = `Hi ${name}, Thank you for registering with Homa Healthcare Center. We will contact you shortly for appointment confirmation.`;
+            const cleanPhone = phone.replace(/[^0-9]/g, '');
+            window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`);
+        }
+        
+        function exportData() {
+            if (allPatients.length === 0) { alert('No data to export!'); return; }
+            const csvContent = convertToCSV(allPatients);
+            downloadCSV(csvContent, 'patients_' + new Date().toISOString().split('T')[0] + '.csv');
+        }
+        
+        function convertToCSV(data) {
+            const headers = ['Name', 'Phone', 'Email', 'Age', 'Gender', 'Registration Time'];
+            const csvRows = [headers.join(',')];
+            data.forEach(patient => {
+                const row = [
+                    patient.name || '', patient.phone || '', patient.email || '', 
+                    patient.age || '', patient.gender || '', 
+                    new Date(patient.registrationTime).toLocaleString()
+                ];
+                csvRows.push(row.join(','));
+            });
+            return csvRows.join('\n');
+        }
+        
+        function downloadCSV(content, filename) {
+            const blob = new Blob([content], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = filename; a.click();
+            window.URL.revokeObjectURL(url);
+        }
+        
+        document.getElementById('searchBox').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredPatients = allPatients.filter(patient => 
+                (patient.name || '').toLowerCase().includes(searchTerm) ||
+                (patient.phone || '').includes(searchTerm) ||
+                (patient.email || '').toLowerCase().includes(searchTerm)
+            );
+            displayPatients(filteredPatients);
+        });
+    </script>
+</body>
+</html>
