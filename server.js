@@ -591,11 +591,11 @@ app.get('/test-upi', (req, res) => {
             </div>
             
             <h3>💳 Pay via UPI:</h3>
-            <div class="upi-id">9963721999@paytm</div>
+            <div class="upi-id">surendra,muddu-1@okhdfcbank</div>
             
             <p><strong>Steps:</strong></p>
             <p>1. Open Google Pay/PhonePe/Paytm</p>
-            <p>2. Send ₹500 to 9963721999@paytm</p>
+            <p>2. Send ₹500 to surendra,muddu-1@okhdfcbank</p>
             <p>3. Add reference: TEST-${Date.now().toString().slice(-6)}</p>
             <p>4. Send confirmation via WhatsApp</p>
             
