@@ -534,6 +534,7 @@ app.get('/api/admin/patients', (req, res) => {
 app.get('/admin', (req, res) => {
     res.send('<h1>Admin Dashboard Works!</h1><p>Testing admin route</p>');
 });
+
 // Start server
 async function startServer() {
   try {
@@ -554,4 +555,56 @@ async function startServer() {
   }
 }
 
-startServer();
+startServer()// ============ UPI PAYMENT SYSTEM (SAFE ADDITION) ============
+// Add this BEFORE the final closing brace of your server.js
+
+app.get('/test-upi', (req, res) => {
+  res.send(`
+    <html>
+    <head>
+        <title>UPI Payment Test - Homa Healthcare</title>
+        <style>
+            body { font-family: Arial; max-width: 400px; margin: 50px auto; padding: 20px; background: #f9f9f9; }
+            .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
+            .header { background: #2c5aa0; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+            .amount { font-size: 36px; color: #2c5aa0; font-weight: bold; margin: 20px 0; }
+            .upi-id { background: #4caf50; color: white; padding: 15px; border-radius: 8px; font-size: 18px; font-weight: bold; margin: 15px 0; }
+            .btn { background: #25d366; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 15px; }
+            .success { background: #e8f5e8; color: #2d5016; padding: 15px; border-radius: 8px; margin: 20px 0; }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="header">
+                <h1>🏥 HOMA HEALTHCARE</h1>
+                <p>Dr. Muddu Surendra Nehru</p>
+                <p>UPI Payment Test</p>
+            </div>
+            
+            <h2>Test Consultation Payment</h2>
+            <div class="amount">₹500</div>
+            
+            <div class="success">
+                ✅ Your existing registration system is SAFE<br>
+                ✅ This is just a payment test page<br>
+                ✅ No changes to your current functionality
+            </div>
+            
+            <h3>💳 Pay via UPI:</h3>
+            <div class="upi-id">9963721999@paytm</div>
+            
+            <p><strong>Steps:</strong></p>
+            <p>1. Open Google Pay/PhonePe/Paytm</p>
+            <p>2. Send ₹500 to 9963721999@paytm</p>
+            <p>3. Add reference: TEST-${Date.now().toString().slice(-6)}</p>
+            <p>4. Send confirmation via WhatsApp</p>
+            
+            <a href="https://wa.me/919963721999?text=Test%20UPI%20payment%20completed%20for%20consultation.%20Amount:%20₹500" 
+               class="btn">📱 Send Payment Confirmation</a>
+        </div>
+    </body>
+    </html>
+  `);
+});
+
+console.log('🧪 UPI TEST ROUTE ADDED SAFELY');;
