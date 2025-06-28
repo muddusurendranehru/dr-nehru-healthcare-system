@@ -206,7 +206,15 @@ app.post('/api/register', [
         'Message_Count': 0
       }
     };
-
+// Health check for registration API
+app.get('/api/register', (req, res) => {
+  res.json({
+    status: 'Registration API is working',
+    method: 'POST',
+    message: 'Send POST request with name, email, phone to register patients',
+    airtableConnected: true
+  });
+});
     const response = await axios.post(
       `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/${process.env.AIRTABLE_TABLE_ID}`,
       airtableData,
