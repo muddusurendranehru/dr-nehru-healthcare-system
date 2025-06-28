@@ -182,35 +182,52 @@ app.get('/', (req, res) => {
 });
 
 // User registration
+// User registration with Airtable integration
 app.post('/api/register', [
   body('email').isEmail(),
-  body('password').isLength({ min: 6 }),
   body('first_name').trim().isLength({ min: 1 }),
   body('last_name').trim().isLength({ min: 1 })
 ], async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { email, password, first_name, last_name, phone, role = 'patient' } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const axios = require('axios');
     
-    const [result] = await pool.execute(
-      'INSERT INTO users (email, password, first_name, last_name, phone, role) VALUES (?, ?, ?, ?, ?, ?)',
-      [email, hashedPassword, first_name, last_name, phone, role]
+    const { email, first_name, last_name, phone } = req.body;
+    
+    // Add to Airtable instead of MySQL
+    const airtableData = {
+      fields: {
+        'Name': `${first_name} ${last_name}`,
+        'Phone': phone || '',
+        'Email': email || '',
+        'Group': 'C',
+        'Score': 0,
+        'Registration_Status': 'Pending',
+        'Payment_Status': 'Unpaid',
+        'Message_Count': 0
+      }
+    };
+
+    const response = await axios.post(
+      `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/${process.env.AIRTABLE_TABLE_ID}`,
+      airtableData,
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.AIRTABLE_TOKEN}`,
+          'Content-Type': 'application/json'
+        }
+      }
     );
 
-    res.status(201).json({ message: 'User created successfully', userId: result.insertId });
+    res.status(201).json({ 
+      message: 'Patient registered successfully', 
+      airtableId: response.data.id 
+    });
+    
   } catch (error) {
-    if (error.code === 'ER_DUP_ENTRY') {
-      return res.status(409).json({ error: 'Email already exists' });
-    }
+    console.error('Registration error:', error);
     res.status(500).json({ error: 'Registration failed' });
   }
 });
-
 // User login
 app.post('/api/login', [
   body('email').isEmail(),
