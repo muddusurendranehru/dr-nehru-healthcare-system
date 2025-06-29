@@ -195,7 +195,321 @@ app.get('/health', (req, res) => {
     }
   });
 });
+// ADD THIS ROUTE TO YOUR server.js FILE (after the admin route)
 
+// Patient Registration Form - Beautiful UI
+app.get('/register', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Patient Registration - Dr. Nehru Healthcare Center</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            
+            .registration-container {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                max-width: 500px;
+                width: 100%;
+                animation: slideUp 0.6s ease-out;
+            }
+            
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }
+            
+            .header h1 {
+                font-size: 2.2em;
+                margin-bottom: 10px;
+                font-weight: 300;
+            }
+            
+            .header p {
+                opacity: 0.9;
+                font-size: 1.1em;
+            }
+            
+            .form-container {
+                padding: 40px 30px;
+            }
+            
+            .form-group {
+                margin-bottom: 25px;
+            }
+            
+            .form-group label {
+                display: block;
+                margin-bottom: 8px;
+                color: #333;
+                font-weight: 500;
+                font-size: 0.95em;
+            }
+            
+            .form-group input {
+                width: 100%;
+                padding: 15px;
+                border: 2px solid #e1e5e9;
+                border-radius: 10px;
+                font-size: 1em;
+                transition: all 0.3s ease;
+                background: #f8f9fa;
+            }
+            
+            .form-group input:focus {
+                outline: none;
+                border-color: #667eea;
+                background: white;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+            
+            .form-group input:valid {
+                border-color: #28a745;
+                background: #f8fff9;
+            }
+            
+            .required {
+                color: #dc3545;
+            }
+            
+            .register-btn {
+                width: 100%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 18px;
+                border-radius: 10px;
+                font-size: 1.1em;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            
+            .register-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            }
+            
+            .register-btn:active {
+                transform: translateY(0);
+            }
+            
+            .loading {
+                opacity: 0.7;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+            
+            .success-message, .error-message {
+                padding: 15px;
+                border-radius: 8px;
+                margin-top: 20px;
+                text-align: center;
+                font-weight: 500;
+            }
+            
+            .success-message {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            
+            .error-message {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+            
+            .clinic-info {
+                background: #f8f9fa;
+                padding: 20px;
+                text-align: center;
+                color: #6c757d;
+                font-size: 0.9em;
+            }
+            
+            .clinic-info strong {
+                color: #495057;
+            }
+            
+            @media (max-width: 768px) {
+                .registration-container {
+                    margin: 10px;
+                }
+                
+                .header {
+                    padding: 30px 20px;
+                }
+                
+                .header h1 {
+                    font-size: 1.8em;
+                }
+                
+                .form-container {
+                    padding: 30px 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="registration-container">
+            <div class="header">
+                <h1>🏥 Patient Registration</h1>
+                <p>Dr. Muddu Surendra Nehru</p>
+                <p>Healthcare Center</p>
+            </div>
+            
+            <div class="form-container">
+                <form id="registrationForm">
+                    <div class="form-group">
+                        <label for="firstName">First Name <span class="required">*</span></label>
+                        <input type="text" id="firstName" name="first_name" required placeholder="Enter your first name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lastName">Last Name <span class="required">*</span></label>
+                        <input type="text" id="lastName" name="last_name" required placeholder="Enter your last name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" required placeholder="Enter your email address">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+                    </div>
+                    
+                    <button type="submit" class="register-btn" id="submitBtn">
+                        Register Now
+                    </button>
+                    
+                    <div id="message"></div>
+                </form>
+            </div>
+            
+            <div class="clinic-info">
+                <p><strong>Dr. Nehru Healthcare Center</strong></p>
+                <p>Professional Healthcare Management System</p>
+                <p>Connected to 8,309+ Patient Database</p>
+            </div>
+        </div>
+
+        <script>
+            document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('submitBtn');
+                const messageDiv = document.getElementById('message');
+                
+                // Get form data
+                const formData = {
+                    first_name: document.getElementById('firstName').value.trim(),
+                    last_name: document.getElementById('lastName').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    phone: document.getElementById('phone').value.trim()
+                };
+                
+                // Validation
+                if (!formData.first_name || !formData.last_name || !formData.email) {
+                    messageDiv.innerHTML = '<div class="error-message">Please fill in all required fields.</div>';
+                    return;
+                }
+                
+                // Show loading state
+                submitBtn.textContent = 'Registering...';
+                submitBtn.classList.add('loading');
+                messageDiv.innerHTML = '';
+                
+                try {
+                    const response = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        messageDiv.innerHTML = \`
+                            <div class="success-message">
+                                <strong>✅ Registration Successful!</strong><br>
+                                Welcome \${formData.first_name} \${formData.last_name}!<br>
+                                You have been added to Dr. Nehru's healthcare system.<br>
+                                <small>Patient ID: \${result.airtableId}</small>
+                            </div>
+                        \`;
+                        document.getElementById('registrationForm').reset();
+                    } else {
+                        throw new Error(result.error || 'Registration failed');
+                    }
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    messageDiv.innerHTML = \`
+                        <div class="error-message">
+                            <strong>❌ Registration Failed</strong><br>
+                            \${error.message}<br>
+                            Please try again or contact support.
+                        </div>
+                    \`;
+                } finally {
+                    submitBtn.textContent = 'Register Now';
+                    submitBtn.classList.remove('loading');
+                }
+            });
+            
+            // Add input validation feedback
+            document.querySelectorAll('input[required]').forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this.value.trim() === '') {
+                        this.style.borderColor = '#dc3545';
+                    } else {
+                        this.style.borderColor = '#28a745';
+                    }
+                });
+            });
+        </script>
+    </body>
+    </html>
+  `);
+});
 // Admin Dashboard
 app.get('/admin', (req, res) => {
   res.send(`
